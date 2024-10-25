@@ -1,8 +1,6 @@
-;========TEMPLATE CREATED BY ANTONIO COULTON, Dr JOSEPH DARE =================
+;========TEMPLATE CREATED BY ANTONIO COULTON, Dr J.DARE =================
 ;	    Lecturers, A-level Physics + Electronics
-;		    --BURNLEY COLLEGE--
-;                 acoulton@burnley.ac.uk
-;		    jdare@burnley.ac.uk
+;		Email: antonioastro2020@gmail.com
 
 ;adapted from Eduqas Template for A-level Electronics
     ;https://www.eduqas.co.uk/qualifications/electronics-as-a-level/#tab_keydocuments
