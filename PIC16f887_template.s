@@ -102,6 +102,7 @@ loop1000ms:
 	decfsz WAIT1k,1	;+10
 	goto loop1000ms	;+2*9
 	return		;+2 = 1,003,052
+ 
 readadc0:
 	movlw 00000001B	    ;PORTA,0
 	bsf STATUS,RPZERO
@@ -109,10 +110,10 @@ readadc0:
 	bcf STATUS,RPZERO
 	movlw 01000001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check
 	movwf ADCON0
-	bsf ADCON0,2	    ;start adc conversion
+	bsf ADCON0,1	    ;start adc conversion
 loopadc0:
 	clrwdt		    ;Pat the watchdog
-	btfsc ADCON0,2	    ;check if conversion finished
+	btfsc ADCON0,1	    ;check if conversion finished
 	goto loopadc0
 	movf ADRESH,w	    ;take result from ADRESH
 	movwf ADC0	    ;move result to ADC0
@@ -125,10 +126,10 @@ readadc1:
 	bcf STATUS,RPZERO
 	movlw 01001001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check 
 	movwf ADCON0
-	bsf ADCON0,2	    ;start adc conversion
+	bsf ADCON0,1	    ;start adc conversion
 loopadc1:
 	clrwdt		    ;Pat the watchdog
-	btfsc ADCON0,2	    ;check if conversion finished
+	btfsc ADCON0,1	    ;check if conversion finished
 	goto loopadc1
 	movf ADRESH,w
 	movwf ADC1
@@ -141,10 +142,10 @@ readadc2:
 	bcf STATUS,RPZERO
 	movlw 01010001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check 
 	movwf ADCON0
-	bsf ADCON0,2	    ;start adc conversion
+	bsf ADCON0,1	    ;start adc conversion
 loopadc2:
 	clrwdt		    ;Pat the watchdog
-	btfsc ADCON0,2	    ;check if conversion finished
+	btfsc ADCON0,1	    ;check if conversion finished
 	goto loopadc2
 	movf ADRESH,w
 	movwf ADC2
@@ -158,8 +159,7 @@ IOPORTC EQU 11111111B ;set the PORTC data direction
 IOPORTD EQU 00000000B ;set the PORTD data direction
 IOPORTE EQU 1000B ;set the PORTE data direction. PORTE has only 4 bits.
 	
-;PORTB,0 is the default interrupt trigger - ensure this is set as 1 if used as such.
-;PORTA,5 must ALWAYS be an input.
+;PORTB,0 is the default interrupt trigger - ensure this is set as 1 if used as such
 ;PORTA are all usable as analog inputs.
 ;PORTE,3 must be an INPUT.
 
