@@ -45,16 +45,16 @@ INTEN	EQU 0x04	;interrupt 0 enable - INT0IE in INTCON
 GI	EQU 0x07	;global interrupt enable - GIE in INTCON
 	
 ;NUM	EQU abcdefg0B
-NINE	EQU 11110110B
+NINE	EQU 11011110B
 EIGHT	EQU 11111110B
-SEVEN	EQU 11100000B
-SIX	EQU 10111110B
-FIVE	EQU 10110110B
-FOUR	EQU 01100110B
-THREE	EQU 11110010B
-TWO	EQU 11011010B
-ONE	EQU 01100000B
-ZER0	EQU 11111100B
+SEVEN	EQU 00001110B
+SIX	EQU 11111010B
+FIVE	EQU 11011010B
+FOUR	EQU 11001100B
+THREE	EQU 10011110B
+TWO	EQU 10110110B
+ONE	EQU 00001100B
+ZER0	EQU 01111110B
 	
 ;================================== RESET VECTORS  =============================	
 psect RES_VECT,class=CODE,delta=2 ; PIC10/12/16
@@ -119,6 +119,7 @@ loop1000ms:
 	decfsz WAIT1k,1	;+10
 	goto loop1000ms	;+2*9
 	return		;+2 = 1,003,052
+	
 readadc0:
 	movlw 00000001B	    ;PORTA,0
 	bsf STATUS,RPZERO
@@ -126,10 +127,10 @@ readadc0:
 	bcf STATUS,RPZERO
 	movlw 01000001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check
 	movwf ADCON0
-	bsf ADCON0,2	    ;start adc conversion
+	bsf ADCON0,1	    ;start adc conversion
 loopadc0:
 	clrwdt		    ;Pat the watchdog
-	btfsc ADCON0,2	    ;check if conversion finished
+	btfsc ADCON0,1	    ;check if conversion finished
 	goto loopadc0
 	movf ADRESH,w	    ;take result from ADRESH
 	movwf ADC0	    ;move result to ADC0
@@ -142,10 +143,10 @@ readadc1:
 	bcf STATUS,RPZERO
 	movlw 01001001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check 
 	movwf ADCON0
-	bsf ADCON0,2	    ;start adc conversion
+	bsf ADCON0,1	    ;start adc conversion
 loopadc1:
 	clrwdt		    ;Pat the watchdog
-	btfsc ADCON0,2	    ;check if conversion finished
+	btfsc ADCON0,1	    ;check if conversion finished
 	goto loopadc1
 	movf ADRESH,w
 	movwf ADC1
@@ -158,10 +159,10 @@ readadc2:
 	bcf STATUS,RPZERO
 	movlw 01010001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check 
 	movwf ADCON0
-	bsf ADCON0,2	    ;start adc conversion
+	bsf ADCON0,1	    ;start adc conversion
 loopadc2:
 	clrwdt		    ;Pat the watchdog
-	btfsc ADCON0,2	    ;check if conversion finished
+	btfsc ADCON0,1	    ;check if conversion finished
 	goto loopadc2
 	movf ADRESH,w
 	movwf ADC2
@@ -170,7 +171,7 @@ loopadc2:
 ;================================ INITIALISATION ===============================
 ;7 seg connections for PORTB,C,D: abcdefg0B - the LSB is not used
 	
-IOPORTA	EQU 00100001B ;set the PORTA data direction. PORTA,0 = ADC.
+IOPORTA	EQU 00000001B ;set the PORTA data direction. PORTA,0 = ADC.
 IOPORTB	EQU 00000001B ;set the PORTB data direction. PORTB,0 must be 1. 
 IOPORTC EQU 00000000B ;set the PORTC data direction
 IOPORTD EQU 00000000B ;set the PORTD data direction
@@ -182,11 +183,11 @@ IOPORTE EQU 00001000B ;set the PORTE data direction. PORTE has only 4 usable bit
 ;PORTE,3 must be an INPUT.
 
 start:
-    clrf PORTA
-    clrf PORTB
-    clrf PORTC
-    clrf PORTD
-    clrf PORTE
+    ;clrf PORTA
+    ;clrf PORTB
+    ;clrf PORTC
+    ;clrf PORTD
+    ;clrf PORTE
     bsf STATUS,RPZERO	;change RP0 to 1 to select BANK1
     movlw 01100000B	;set the clock speed to 4MHz https://docs.rs-online.com/a168/0900766b81382af8.pdf pg40
     movwf OSCCON 	;move the new clock speed to the clock controller.	
@@ -210,9 +211,9 @@ start:
     ;bsf INTCON,GI	;enable all interruptions
     
 main:
-    ;call readadc0 
-    ;movf ADC0,w
-    movlw 217
+    call readadc0 
+    movf ADC0,w
+    ;movlw 178
     movwf BINARY_INPUT
     bsf STATUS,0
     clrf NUM_100s
@@ -248,7 +249,7 @@ check_100s_digit_is_2:
     btfss STATUS,2
     goto check_100s_digit_is_1
     movlw TWO
-    movwf PORTB
+    movwf PORTD
     goto check_10s_digit_is_9
     
 check_100s_digit_is_1:
@@ -257,7 +258,7 @@ check_100s_digit_is_1:
     btfss STATUS,2
     goto check_100s_digit_is_0
     movlw ONE
-    movwf PORTB
+    movwf PORTD
     goto check_10s_digit_is_9
     
 check_100s_digit_is_0:
@@ -266,7 +267,7 @@ check_100s_digit_is_0:
     btfss STATUS,2
     goto error_occurred
     movlw ZER0
-    movwf PORTB
+    movwf PORTD
     goto check_10s_digit_is_9
     
 check_10s_digit_is_9:
@@ -365,7 +366,7 @@ check_1s_digit_is_9:
     btfss STATUS,2
     goto check_1s_digit_is_8
     movlw NINE
-    movwf PORTD
+    movwf PORTA
     goto finished
 
 check_1s_digit_is_8:
@@ -374,7 +375,7 @@ check_1s_digit_is_8:
     btfss STATUS,2
     goto check_1s_digit_is_7
     movlw EIGHT
-    movwf PORTD
+    movwf PORTA
     goto finished
 
 check_1s_digit_is_7:
@@ -383,7 +384,7 @@ check_1s_digit_is_7:
     btfss STATUS,2
     goto check_1s_digit_is_6
     movlw SEVEN
-    movwf PORTD
+    movwf PORTA
     goto finished
     
 check_1s_digit_is_6:
@@ -392,7 +393,7 @@ check_1s_digit_is_6:
     btfss STATUS,2
     goto check_1s_digit_is_5
     movlw SIX
-    movwf PORTD
+    movwf PORTA
     goto finished
     
 check_1s_digit_is_5:
@@ -401,7 +402,7 @@ check_1s_digit_is_5:
     btfss STATUS,2
     goto check_1s_digit_is_4
     movlw FIVE
-    movwf PORTD
+    movwf PORTA
     goto finished
     
 check_1s_digit_is_4:
@@ -410,7 +411,7 @@ check_1s_digit_is_4:
     btfss STATUS,2
     goto check_1s_digit_is_3
     movlw FOUR
-    movwf PORTD
+    movwf PORTA
     goto finished
 
 check_1s_digit_is_3:
@@ -419,7 +420,7 @@ check_1s_digit_is_3:
     btfss STATUS,2
     goto check_1s_digit_is_2
     movlw THREE
-    movwf PORTD
+    movwf PORTA
     goto finished
     
 check_1s_digit_is_2:
@@ -428,7 +429,7 @@ check_1s_digit_is_2:
     btfss STATUS,2
     goto check_1s_digit_is_1
     movlw TWO
-    movwf PORTD
+    movwf PORTA
     goto finished
     
 check_1s_digit_is_1:
@@ -437,7 +438,7 @@ check_1s_digit_is_1:
     btfss STATUS,2
     goto check_1s_digit_is_0
     movlw ONE
-    movwf PORTD
+    movwf PORTA
     goto finished
     
 check_1s_digit_is_0:
@@ -446,22 +447,17 @@ check_1s_digit_is_0:
     btfss STATUS,2
     goto error_occurred
     movlw ZER0
-    movwf PORTD
+    movwf PORTA
     goto finished
     
 finished:
-    call wait1000ms
-    call wait1000ms
     goto main
     
 error_occurred:
-    movlw 11111110B
-    movwf PORTB
+    movlw 00000010B
+    movwf PORTA
     movwf PORTC
     movwf PORTD
-    call wait1000ms
-    call wait1000ms
-    call wait1000ms
     call wait1000ms
     goto main
     
